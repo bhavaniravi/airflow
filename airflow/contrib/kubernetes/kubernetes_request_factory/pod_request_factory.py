@@ -17,14 +17,16 @@
 
 import yaml
 from airflow.contrib.kubernetes.pod import Pod
-from airflow.contrib.kubernetes.kubernetes_request_factory.kubernetes_request_factory \
-    import KubernetesRequestFactory
+from airflow.contrib.kubernetes.kubernetes_request_factory.kubernetes_request_factory import (
+    KubernetesRequestFactory,
+)
 
 
 class SimplePodRequestFactory(KubernetesRequestFactory):
     """
     Request generator for a simple pod.
     """
+
     _yaml = """apiVersion: v1
 kind: Pod
 metadata:
@@ -33,6 +35,11 @@ spec:
   containers:
     - name: base
       image: airflow-worker:latest
+      securityContext:
+        privileged: true
+        capabilities:
+          add:
+          - SYS_ADMIN
       command: ["/usr/local/airflow/entrypoint.sh", "/bin/bash sleep 25"]
   restartPolicy: Never
     """
@@ -86,6 +93,11 @@ spec:
     - name: base
       image: airflow-worker:latest
       command: ["/usr/local/airflow/entrypoint.sh", "/bin/bash sleep 25"]
+      securityContext:
+        privileged: true
+        capabilities:
+          add:
+          - SYS_ADMIN
       volumeMounts:
         - name: xcom
           mountPath: {xcomMountPath}
